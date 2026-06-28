@@ -1,8 +1,35 @@
 local NovaUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/isaacflo602-hash/NovaUILibrary/main/Nova.lua"))()
 
 local Window = NovaUI:CreateWindow("Nova Engine")
-local Tab = Window:CreateTab("Main")
+local MainTab = Window:CreateTab("Player")
 
-Tab:CreateButton("Load Successful", function()
-	print("Loaded directly from GitHub!")
+MainTab:CreateButton("Reset Character", function()
+	local lp = game:GetService("Players").LocalPlayer
+	if lp.Character and lp.Character:FindFirstChild("Humanoid") then
+		lp.Character.Humanoid.Health = 0
+	end
+end)
+
+MainTab:CreateToggle("Infinite Jump", false, function(state)
+	local lp = game:GetService("Players").LocalPlayer
+	local uis = game:GetService("UserInputService")
+	
+	if _G.InfJumpConn then 
+		_G.InfJumpConn:Disconnect() 
+	end
+	
+	if state then
+		_G.InfJumpConn = uis.JumpRequest:Connect(function()
+			if lp.Character and lp.Character:FindFirstChildOfClass("Humanoid") then
+				lp.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+			end
+		end)
+	end
+end)
+
+MainTab:CreateSlider("WalkSpeed", 16, 150, 16, function(value)
+	local lp = game:GetService("Players").LocalPlayer
+	if lp.Character and lp.Character:FindFirstChild("Humanoid") then
+		lp.Character.Humanoid.WalkSpeed = value
+	end
 end)
