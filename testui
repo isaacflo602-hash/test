@@ -1,20 +1,8 @@
-local RawURL = "https://raw.githubusercontent.com/isaacflo602-hash/NovaUILibrary/main/Nova.lua"
-local NovaUI = loadstring(game:HttpGet(RawURL))()
+local NovaUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/isaacflo602-hash/NovaUILibrary/main/Nova.lua"))()
 
-local Window = NovaUI:CreateWindow("Nova Test")
+local Window = NovaUI:CreateWindow("Nova Engine")
+local Tab = Window:CreateTab("Main")
 
-local Tab1 = Window:CreateTab("Combat")
-local Tab2 = Window:CreateTab("Visuals")
-local Tab3 = Window:CreateTab("Movement")
-
-Tab1:CreateButton("Kill Aura", function()
-	print("Kill Aura activated")
-end)
-
-Tab2:CreateToggle("ESP Boxes", false, function(state)
-	print("ESP state:", state)
-end)
-
-Tab3:CreateSlider("WalkSpeed", 16, 250, 16, function(value)
-	print("WalkSpeed changed to:", value)
+Tab:CreateButton("Load Successful", function()
+	print("Loaded directly from GitHub!")
 end)
