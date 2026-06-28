@@ -1,276 +1,76 @@
-local Players = game:GetService("Players")
-local UIS = game:GetService("UserInputService")
-local CoreGui = game:GetService("CoreGui")
-local player = Players.LocalPlayer
+print("--- Nova UI Diagnostic Start ---")
 
-local NovaUI = {}
+local success, NovaUI = pcall(function()
+    return loadstring(game:HttpGet("https://raw.githubusercontent.com/isaacflo602-hash/NovaUILibrary/main/Nova.lua"))()
+end)
 
-local C = {
-	Bg          = Color3.fromRGB(15, 15, 26),
-	Card        = Color3.fromRGB(26, 26, 46),
-	TabBar      = Color3.fromRGB(22, 22, 42),
-	ActiveTab   = Color3.fromRGB(42, 42, 74),
-	Accent      = Color3.fromRGB(124, 92, 252),
-	AccentHover = Color3.fromRGB(160, 132, 255),
-	Text        = Color3.fromRGB(255, 255, 255),
-	Subtext     = Color3.fromRGB(136, 136, 170),
-	Border      = Color3.fromRGB(42, 42, 74),
-	ToggleOff   = Color3.fromRGB(50, 50, 80),
-	ToggleOn    = Color3.fromRGB(124, 92, 252),
-	HoverCard   = Color3.fromRGB(36, 36, 60),
-	SliderTrack = Color3.fromRGB(35, 35, 58),
-}
-
-local function addCorner(parent, radius)
-	local c = Instance.new("UICorner")
-	c.CornerRadius = UDim.new(0, radius)
-	c.Parent = parent
-	return c
+if not success or not NovaUI then
+    print("❌ ERROR: Failed to download or parse the Nova library from GitHub!")
+    print("Reason: ", tostring(NovaUI))
+    return
+else
+    print("✅ SUCCESS: Nova Library downloaded perfectly!")
 end
 
-local function addStroke(parent, color, thickness)
-	local s = Instance.new("UIStroke")
-	s.Color = color
-	s.Thickness = thickness or 1
-	s.Parent = parent
-	return s
+local WindowSuccess, Window = pcall(function()
+    return NovaUI:CreateWindow("Nova Engine")
+end)
+
+if not WindowSuccess or not Window then
+    print("❌ ERROR: Failed while running :CreateWindow()")
+    return
+else
+    print("✅ SUCCESS: Window created!")
 end
 
-local function addPadding(parent, left, top, right, bottom)
-	local p = Instance.new("UIPadding")
-	p.PaddingLeft = UDim.new(0, left or 0)
-	p.PaddingTop = UDim.new(0, top or 0)
-	p.PaddingRight = UDim.new(0, right or 0)
-	p.PaddingBottom = UDim.new(0, bottom or 0)
-	p.Parent = parent
-	return p
+local TabSuccess, MainTab = pcall(function()
+    return Window:CreateTab("Player")
+end)
+
+if not TabSuccess or not MainTab then
+    print("❌ ERROR: Failed while running :CreateTab()")
+    return
+else
+    print("✅ SUCCESS: Tab created!")
 end
 
-function NovaUI:CreateWindow(titleText)
-	local Window = {
-		CurrentTab = nil,
-		Tabs = {},
-		TabButtons = {}
-	}
-	
-	local screenGui = Instance.new("ScreenGui")
-	screenGui.Name = "NovaUI_Instance"
-	screenGui.ResetOnSpawn = false
-	screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-	
-	local success, protected = pcall(function()
-		screenGui.Parent = CoreGui
-	end)
-	if not success then
-		screenGui.Parent = player:WaitForChild("PlayerGui")
-	end
+-- Variables for character stats
+local lp = game:GetService("Players").LocalPlayer
+local targetSpeed = 16
+local targetJump = 50
 
-	local main = Instance.new("Frame")
-	main.Name = "Main"
-	main.Size = UDim2.new(0, 520, 0, 440)
-	main.Position = UDim2.new(0.5, -260, 0.5, -220)
-	main.BackgroundColor3 = C.Bg
-	main.BorderSizePixel = 0
-	main.Parent = screenGui
-	addCorner(main, 12)
-	addStroke(main, C.Border, 1)
+-- Background Loop
+task.spawn(function()
+    while task.wait(0.1) do
+        pcall(function()
+            if lp.Character then
+                local humanoid = lp.Character:FindFirstChildOfClass("Humanoid")
+                if humanoid then
+                    humanoid.WalkSpeed = targetSpeed
+                    if humanoid.UseJumpPower then
+                        humanoid.JumpPower = targetJump
+                    else
+                        humanoid.JumpHeight = (targetJump ^ 2) / (2 * game.Workspace.Gravity)
+                    end
+                end
+            end
+        end)
+    end
+end)
 
-	local titleBar = Instance.new("Frame")
-	titleBar.Name = "TitleBar"
-	titleBar.Size = UDim2.new(1, 0, 0, 44)
-	titleBar.BackgroundColor3 = C.Card
-	titleBar.BorderSizePixel = 0
-	titleBar.Parent = main
-	addCorner(titleBar, 12)
+-- Create Sliders
+pcall(function()
+    MainTab:CreateSlider("WalkSpeed", 16, 250, 16, function(value)
+        targetSpeed = value
+    end)
+    print("✅ SUCCESS: WalkSpeed Slider added!")
+end)
 
-	local titleFix = Instance.new("Frame")
-	titleFix.Size = UDim2.new(1, 0, 0, 12)
-	titleFix.Position = UDim2.new(0, 0, 1, -12)
-	titleFix.BackgroundColor3 = C.Card
-	titleFix.BorderSizePixel = 0
-	titleFix.Parent = titleBar
+pcall(function()
+    MainTab:CreateSlider("JumpPower", 50, 300, 50, function(value)
+        targetJump = value
+    end)
+    print("✅ SUCCESS: JumpPower Slider added!")
+end)
 
-	local titleLabel = Instance.new("TextLabel")
-	titleLabel.Size = UDim2.new(1, -80, 1, 0)
-	titleLabel.Position = UDim2.new(0, 16, 0, 0)
-	titleLabel.BackgroundTransparency = 1
-	titleLabel.Text = titleText or "Nova UI"
-	titleLabel.TextColor3 = C.Text
-	titleLabel.TextSize = 16
-	titleLabel.Font = Enum.Font.GothamBold
-	titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-	titleLabel.Parent = titleBar
-
-	local closeBtn = Instance.new("TextButton")
-	closeBtn.Name = "Close"
-	closeBtn.Size = UDim2.new(0, 28, 0, 28)
-	closeBtn.Position = UDim2.new(1, -38, 0.5, -14)
-	closeBtn.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
-	closeBtn.Text = ""
-	closeBtn.BorderSizePixel = 0
-	closeBtn.Parent = titleBar
-	addCorner(closeBtn, 14)
-	
-	closeBtn.MouseButton1Click:Connect(function()
-		screenGui.Enabled = not screenGui.Enabled
-	end)
-
-	local tabBar = Instance.new("Frame")
-	tabBar.Name = "TabBar"
-	tabBar.Size = UDim2.new(1, -24, 0, 36)
-	tabBar.Position = UDim2.new(0, 12, 0, 52)
-	tabBar.BackgroundColor3 = C.TabBar
-	tabBar.BorderSizePixel = 0
-	tabBar.Parent = main
-	addCorner(tabBar, 8)
-
-	local tabListLayout = Instance.new("UIListLayout")
-	tabListLayout.FillDirection = Enum.FillDirection.Horizontal
-	tabListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
-	tabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	tabListLayout.Padding = UDim.new(0, 4)
-	tabListLayout.Parent = tabBar
-	addPadding(tabBar, 4, 4, 4, 4)
-
-	local contentArea = Instance.new("Frame")
-	contentArea.Name = "ContentArea"
-	contentArea.Size = UDim2.new(1, -24, 1, -104)
-	contentArea.Position = UDim2.new(0, 12, 0, 96)
-	contentArea.BackgroundTransparency = 1
-	contentArea.Parent = main
-	addPadding(contentArea, 0, 4, 0, 0)
-
-	local dragToggle, dragInput, dragStart, startPos
-	titleBar.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			dragToggle = true
-			dragStart = input.Position
-			startPos = main.Position
-
-			input.Changed:Connect(function()
-				if input.UserInputState == Enum.UserInputState.End then
-					dragToggle = false
-				end
-			end)
-		end
-	end)
-
-	titleBar.InputChanged:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-			dragInput = input
-		end
-	end)
-
-	UIS.InputChanged:Connect(function(input)
-		if input == dragInput and dragToggle then
-			local delta = input.Position - dragStart
-			main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-		end
-	end)
-
-	function Window:CreateTab(tabName)
-		local Tab = {}
-		
-		local btn = Instance.new("TextButton")
-		btn.Name = tabName
-		btn.Size = UDim2.new(0, 112, 1, 0)
-		btn.BackgroundColor3 = C.TabBar
-		btn.Text = tabName
-		btn.TextColor3 = C.Subtext
-		btn.TextSize = 13
-		btn.Font = Enum.Font.GothamMedium
-		btn.BorderSizePixel = 0
-		btn.AutoButtonColor = false
-		btn.Parent = tabBar
-		addCorner(btn, 6)
-
-		local tabFrame = Instance.new("ScrollingFrame")
-		tabFrame.Name = tabName
-		tabFrame.Size = UDim2.new(1, 0, 1, 0)
-		tabFrame.BackgroundTransparency = 1
-		tabFrame.BorderSizePixel = 0
-		tabFrame.ScrollBarThickness = 4
-		tabFrame.ScrollBarImageColor3 = C.Border
-		tabFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-		tabFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
-		tabFrame.Visible = false
-		tabFrame.Parent = contentArea
-
-		local tabLayout = Instance.new("UIListLayout")
-		tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
-		tabLayout.Padding = UDim.new(0, 10)
-		tabLayout.Parent = tabFrame
-
-		Window.Tabs[tabName] = tabFrame
-		Window.TabButtons[tabName] = btn
-
-		local function selectThisTab()
-			for name, frame in pairs(Window.Tabs) do
-				if name == tabName then
-					frame.Visible = true
-					Window.TabButtons[name].BackgroundColor3 = C.ActiveTab
-					Window.TabButtons[name].TextColor3 = C.Text
-				else
-					frame.Visible = false
-					Window.TabButtons[name].BackgroundColor3 = C.TabBar
-					Window.TabButtons[name].TextColor3 = C.Subtext
-				end
-			end
-		end
-
-		btn.MouseButton1Click:Connect(selectThisTab)
-		
-		if not Window.CurrentTab then
-			selectThisTab()
-			Window.CurrentTab = tabName
-		end
-
-		function Tab:CreateSlider(text, min, max, default, callback)
-			local container = Instance.new("Frame")
-			container.Size = UDim2.new(1, 0, 0, 48)
-			container.BackgroundColor3 = C.Card
-			container.BorderSizePixel = 0
-			container.Parent = tabFrame
-			addCorner(container, 8)
-
-			local lbl = Instance.new("TextLabel")
-			lbl.Size = UDim2.new(1, -80, 0, 20)
-			lbl.Position = UDim2.new(0, 10, 0, 4)
-			lbl.BackgroundTransparency = 1
-			lbl.Text = text
-			lbl.TextColor3 = C.Text
-			lbl.TextSize = 13
-			lbl.Font = Enum.Font.GothamMedium
-			lbl.TextXAlignment = Enum.TextXAlignment.Left
-			lbl.Parent = container
-
-			local valLabel = Instance.new("TextLabel")
-			valLabel.Size = UDim2.new(0, 60, 0, 20)
-			valLabel.Position = UDim2.new(1, -70, 0, 4)
-			valLabel.BackgroundTransparency = 1
-			valLabel.Text = tostring(default)
-			valLabel.TextColor3 = C.Accent
-			valLabel.TextSize = 13
-			valLabel.Font = Enum.Font.GothamBold
-			valLabel.TextXAlignment = Enum.TextXAlignment.Right
-			valLabel.Parent = container
-
-			local track = Instance.new("Frame")
-			track.Size = UDim2.new(1, -20, 0, 6)
-			track.Position = UDim2.new(0, 10, 0, 30)
-			track.BackgroundColor3 = C.SliderTrack
-			track.BorderSizePixel = 0
-			track.Parent = container
-			addCorner(track, 3)
-
-			local fill = Instance.new("Frame")
-			local startPercent = (default - min) / (max - min)
-			fill.Size = UDim2.new(startPercent, 0, 1, 0)
-			fill.BackgroundColor3 = C.Accent
-			fill.BorderSizePixel = 0
-			fill.Parent = track
-			addCorner(fill, 3)
-
-			local knob = Instance.new("Frame")
-			knob.Size = UDim2.new(0, 14, 0, 14)
-			knob.Position = UDim2.new(start
+print("--- Nova UI Diagnostic End ---")
