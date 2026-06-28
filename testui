@@ -1,4 +1,27 @@
-local NovaUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/isaacflo602-hash/NovaUILibrary/main/Nova.lua"))()
+local success, NovaUI = pcall(function()
+	return loadstring(game:HttpGet("https://raw.githubusercontent.com/isaacflo602-hash/NovaUILibrary/main/Nova.lua"))()
+end)
+
+if not success or not NovaUI then
+	local coreGui = game:GetService("CoreGui")
+	local sg = Instance.new("ScreenGui")
+	sg.Name = "NovaFallbackError"
+	sg.Parent = coreGui
+	
+	local f = Instance.new("Frame")
+	f.Size = UDim2.new(0, 300, 0, 100)
+	f.Position = UDim2.new(0.5, -150, 0.5, -50)
+	f.BackgroundColor3 = Color3.fromRGB(40, 20, 20)
+	f.Parent = sg
+	
+	local t = Instance.new("TextLabel")
+	t.Size = UDim2.new(1, 0, 1, 0)
+	t.Text = "Failed to load library from GitHub link!"
+	t.TextColor3 = Color3.fromRGB(255, 100, 100)
+	t.TextSize = 14
+	t.Parent = f
+	return
+end
 
 local Window = NovaUI:CreateWindow("Nova Engine")
 local MainTab = Window:CreateTab("Player")
@@ -7,13 +30,18 @@ local lp = game:GetService("Players").LocalPlayer
 local targetSpeed = 16
 local targetJump = 50
 
+for _, obj in pairs(game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"):GetChildren()) do
+	if obj.Name == "NovaUI_Instance" then
+		obj.Parent = game:GetService("CoreGui")
+	end
+end
+
 task.spawn(function()
 	while task.wait(0.1) do
 		if lp.Character then
 			local humanoid = lp.Character:FindFirstChildOfClass("Humanoid")
 			if humanoid then
 				humanoid.WalkSpeed = targetSpeed
-				
 				if humanoid.UseJumpPower then
 					humanoid.JumpPower = targetJump
 				else
