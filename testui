@@ -3,33 +3,31 @@ local NovaUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/isaacf
 local Window = NovaUI:CreateWindow("Nova Engine")
 local MainTab = Window:CreateTab("Player")
 
-MainTab:CreateButton("Reset Character", function()
-	local lp = game:GetService("Players").LocalPlayer
-	if lp.Character and lp.Character:FindFirstChild("Humanoid") then
-		lp.Character.Humanoid.Health = 0
-	end
-end)
+local lp = game:GetService("Players").LocalPlayer
+local targetSpeed = 16
+local targetJump = 50
 
-MainTab:CreateToggle("Infinite Jump", false, function(state)
-	local lp = game:GetService("Players").LocalPlayer
-	local uis = game:GetService("UserInputService")
-	
-	if _G.InfJumpConn then 
-		_G.InfJumpConn:Disconnect() 
-	end
-	
-	if state then
-		_G.InfJumpConn = uis.JumpRequest:Connect(function()
-			if lp.Character and lp.Character:FindFirstChildOfClass("Humanoid") then
-				lp.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+task.spawn(function()
+	while task.wait(0.1) do
+		if lp.Character then
+			local humanoid = lp.Character:FindFirstChildOfClass("Humanoid")
+			if humanoid then
+				humanoid.WalkSpeed = targetSpeed
+				
+				if humanoid.UseJumpPower then
+					humanoid.JumpPower = targetJump
+				else
+					humanoid.JumpHeight = (targetJump ^ 2) / (2 * game.Workspace.Gravity)
+				end
 			end
-		end)
+		end
 	end
 end)
 
-MainTab:CreateSlider("WalkSpeed", 16, 150, 16, function(value)
-	local lp = game:GetService("Players").LocalPlayer
-	if lp.Character and lp.Character:FindFirstChild("Humanoid") then
-		lp.Character.Humanoid.WalkSpeed = value
-	end
+MainTab:CreateSlider("WalkSpeed", 16, 250, 16, function(value)
+	targetSpeed = value
+end)
+
+MainTab:CreateSlider("JumpPower", 50, 300, 50, function(value)
+	targetJump = value
 end)
