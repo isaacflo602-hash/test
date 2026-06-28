@@ -1,3 +1,27 @@
+local function showMobileError(msg)
+	local sg = Instance.new("ScreenGui")
+	sg.Name = "NovaDebug"
+	sg.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+	
+	local f = Instance.new("Frame")
+	f.Size = UDim2.new(0, 400, 0, 150)
+	f.Position = UDim2.new(0.5, -200, 0.5, -75)
+	f.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	f.Parent = sg
+	
+	local t = Instance.new("TextLabel")
+	t.Size = UDim2.new(1, -20, 1, -20)
+	t.Position = UDim2.new(0, 10, 0, 10)
+	t.BackgroundTransparency = 1
+	t.TextColor3 = Color3.fromRGB(255, 75, 75)
+	t.TextSize = 14
+	t.TextWrapped = true
+	t.TextXAlignment = Enum.TextXAlignment.Left
+	t.TextYAlignment = Enum.TextYAlignment.Top
+	t.Text = msg
+	t.Parent = f
+end
+
 local success, err = pcall(function()
 	local RawURL = "https://raw.githubusercontent.com/isaacflo602-hash/NovaUILibrary/main/Nova.lua"
 	local source = game:HttpGet(RawURL)
@@ -22,5 +46,5 @@ local success, err = pcall(function()
 end)
 
 if not success then
-	warn("NovaUI Load Error: " .. tostring(err))
+	showMobileError("NovaUI Error:\n" .. tostring(err))
 end
