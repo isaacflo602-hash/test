@@ -1,54 +1,20 @@
-print("--- Testing GitHub Access ---")
+local RawURL = "https://raw.githubusercontent.com/isaacflo602-hash/NovaUILibrary/main/Nova.lua"
+local NovaUI = loadstring(game:HttpGet(RawURL))()
 
-local raw_url = "https://raw.githubusercontent.com/isaacflo602-hash/NovaUILibrary/main/Nova.lua"
+local Window = NovaUI:CreateWindow("Nova Test")
 
-local success, result = pcall(function()
-    return game:HttpGet(raw_url)
+local Tab1 = Window:CreateTab("Combat")
+local Tab2 = Window:CreateTab("Visuals")
+local Tab3 = Window:CreateTab("Movement")
+
+Tab1:CreateButton("Kill Aura", function()
+	print("Kill Aura activated")
 end)
 
-if not success then
-    print("❌ Network Error: Delta could not reach GitHub.")
-    print("Reason: ", tostring(result))
-elseif result == "404: Not Found" or #result < 10 then
-    print("❌ URL Error: The link connected, but GitHub says the file does not exist or is empty.")
-    print("Double-check your file path and capitalization!")
-else
-    print("✅ Success! File downloaded perfectly. Running UI script now...")
-    
-    -- Compile and run the downloaded code
-    local runSuccess, errorMessage = pcall(function()
-        local loadedScript = loadstring(result)()
-        
-        -- Build the test window using the downloaded library
-        local Window = loadedScript:CreateWindow("Nova Engine Test")
-        local MainTab = Window:CreateTab("Test Tab")
-        
-        local lp = game:GetService("Players").LocalPlayer
-        local targetSpeed = 16
-        local targetJump = 50
+Tab2:CreateToggle("ESP Boxes", false, function(state)
+	print("ESP state:", state)
+end)
 
-        task.spawn(function()
-            while task.wait(0.1) do
-                pcall(function()
-                    if lp.Character and lp.Character:FindFirstChildOfClass("Humanoid") then
-                        local hum = lp.Character:FindFirstChildOfClass("Humanoid")
-                        hum.WalkSpeed = targetSpeed
-                        if hum.UseJumpPower then hum.JumpPower = targetJump else hum.JumpHeight = (targetJump ^ 2) / (2 * game.Workspace.Gravity) end
-                    end
-                end)
-            end
-        end)
-
-        MainTab:CreateSlider("WalkSpeed", 16, 250, 16, function(value)
-            targetSpeed = value
-        end)
-
-        MainTab:CreateSlider("JumpPower", 50, 300, 50, function(value)
-            targetJump = value
-        end)
-    end)
-    
-    if not runSuccess then
-        print("❌ Runtime Error inside your Nova.lua code: ", errorMessage)
-    end
-end
+Tab3:CreateSlider("WalkSpeed", 16, 250, 16, function(value)
+	print("WalkSpeed changed to:", value)
+end)
